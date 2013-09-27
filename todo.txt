@@ -1,0 +1,14 @@
+0.6
+line drawing class - DONE
+
+0.7
+text wrapping - DONE
+
+0.8
+string colour formatting
+	"<c:red>this text</c> is red, <c:30,120,30>this text</c> is another colour, and <c:FF00CC>this text</c> is yet another!"
+	try to figure out a less verbose format...
+
+
+future
+event model?
