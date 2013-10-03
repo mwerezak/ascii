@@ -5,10 +5,14 @@ line drawing class - DONE
 text wrapping - DONE
 
 0.8
-string colour formatting
-	"<c:red>this text</c> is red, <c:30,120,30>this text</c> is another colour, and <c:FF00CC>this text</c> is yet another!"
-	try to figure out a less verbose format...
-
+	fix up the animation class
+	controls - children, enable property
+	ControlLoop class
+	
 
 future
 event model?
+
+string colour formatting
+	"<red|this text> is red, <30,120,30|this text> is another colour, and <FF00CC|this text> is yet another! --\> the escape sequence."
+	try to figure out a less verbose format...

@@ -8,6 +8,35 @@ from decorators import *
 from textwidgets import *
 from shapes import *
 
+class ControlBase (object):
+    """ Runs a get input/update display loop.
+    """
+    
+    def __init__ (self):
+        """ bg_canvas is a canvas containing the background for the widget. The contents of this canvas are
+            unchanged. fg_canvas is the canvas on which the Control will be drawn.
+        """
+        self.children = []
+    
+    def add_control (self, control):
+        self.children.append(control)
+    
+    def remove_control(self, control):
+        self.children.remove(control)
+        
+    def handle_keyinput(self, input):
+        """ Override in subclass. """
+        pass
+        
+    def render (self, canvas, x, y):
+        """ Override in subclass. """
+        pass
+    
+    def run (self, bg_canvas, fg_canvas=None):
+        canvas = fg_canvas or Canvas(bg_canvas.width, bg_canvas.height)
+        #TODO: implement
+
+
 #TODO
 #TextInput
 #Menu
@@ -78,9 +107,7 @@ class Viewport (object):
         self.viewport.x = self._limit_x(x - self.viewport.width/2)
         self.viewport.y = self._limit_y(y - self.viewport.height/2)
 
-""" A Control is an object that combines a widget with some internal state. It provides the standard widget interface
-    as well as methods to modify it's internal state, which determines the appearance of the control.
-"""
+
 
 class ButtonControl (object): pass
         
