@@ -19,7 +19,7 @@ class Label(object):
             canvas.printstr(0,0,self.text)
 
 #TODO: non-breaking space?
-class Text(object):
+class Text (object):
     """ A widget that displays a reflowable column of text. Always starts a new line at newline characters.
     """
     def __init__(self, text, max_width, text_align="left", **style):
