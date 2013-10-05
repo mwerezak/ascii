@@ -5,7 +5,13 @@ line drawing class - DONE
 text wrapping - DONE
 
 0.8
-	fix up the animation class
+string colour formatting
+	"<red|this text> is red, <30,120,30|this text> is another colour, and <#FF00CC|this text> is yet another!"
+	"<&blue|this text> has a blue background, and <yellow&dark_red|this text> is yellow on a dark red background."
+	"--\> it is possible to escape colour expressions \<--"
+
+0.9
+	fix up the animation class - DONE, but still needs testing
 	controls - children, enable property
 	ControlLoop class
 	
@@ -13,6 +19,3 @@ text wrapping - DONE
 future
 event model?
 
-string colour formatting
-	"<red|this text> is red, <30,120,30|this text> is another colour, and <FF00CC|this text> is yet another! --\> the escape sequence."
-	try to figure out a less verbose format...

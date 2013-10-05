@@ -3,8 +3,6 @@ import libtcodpy as dlib
 from canvas import CanvasState
 from misc import OrthoLine
 
-#TODO line painter class
-
 #TODO implement dashed lines
 class LineStyle (object):
     def __init__(self, default, **ch_dict):
@@ -22,7 +20,8 @@ class LineStyle (object):
     def __iter__(self):
         return iter(self.char_dict.itervalues())
     
-
+#To create a linestyle of a single character, you only need to use LineStyle('#') for example.
+    
 single_line = LineStyle(
     dlib.CHAR_CROSS,
     h = dlib.CHAR_HLINE,

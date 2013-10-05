@@ -16,12 +16,13 @@ class ControlBase (object):
         """ bg_canvas is a canvas containing the background for the widget. The contents of this canvas are
             unchanged. fg_canvas is the canvas on which the Control will be drawn.
         """
+        self.enabled = True
         self.children = []
     
-    def add_control (self, control):
+    def add_child (self, control):
         self.children.append(control)
     
-    def remove_control(self, control):
+    def remove_child(self, control):
         self.children.remove(control)
         
     def handle_keyinput(self, input):
@@ -37,6 +38,16 @@ class ControlBase (object):
         #TODO: implement
 
 
+def ControlLoop (object):
+    def __init__ (self, root_control, background, foreground):
+        self.root_control = root_control
+        self.background = background
+        self.foreground = foreground
+    
+        
+    
+    
+        
 #TODO
 #TextInput
 #Menu
