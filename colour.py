@@ -90,10 +90,13 @@ class Colour (object):
     def __mul__ (self, other):
         if isinstance(other, self.__class__):
             return Colour(*(self._intern * other._intern))
-        return Colour(*[ int(other*comp) for comp in self._intern ])
+        return self._scalar_mult(other)
     
     def __rmul__ (self, other):
         return self * other
+        
+    def _scalar_mult (self, n):
+        return Colour(0,0,0, self._intern * n)
         
     def __iter__(self):
         """ Produces an iterator over the components of this colour. """
