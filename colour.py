@@ -1,227 +1,372 @@
-""" A copy of the default libtcodpy colours so that they can be imported separately
+""" This module defines the Colour object and many default colours.
+    
+    Several string representation of Colour objects are supported: these are hex strings, csv strings, and name strings.
+        Hex strings have the form "#RRGGBB", where RR,GG,BB are hex values from 0 - 255 and are exactly 2 characters long.
+        CSV strings have the form "r,g,b", where r, g, and b are either a decimal integer or a hex integer following a '#' e.g. #FF
+        Name strings can be any key string from the colour_names property.
+    
+    TODO: HSV support?
 """
 
-from libtcodpy import Color
+import libtcodpy as dlib
 
-# default colors
+def from_hex (colour_str):
+    if colour_str[0] == '#':    #remove optional '#'
+        colour_str = colour_str[1:]
+    
+    r = int(colour_str[0:2], 16)
+    g = int(colour_str[2:4], 16)
+    b = int(colour_str[4:6], 16)
+    
+    return Colour(r,g,b)
+
+def from_name (name_str):
+    """ Creates a new Colour that is a copy of the Colour indicated by name_str. """
+    if name_str in colour_names:
+        return Colour(*colour_names[name_str])
+    raise KeyError("'%s' is not a recognized colour name"%name_str)
+
+def from_csv (csv_str):
+    """ Attempts to create a new Colour from a comma-separated list of values r, g, b.
+        r, g, and b can be either a decimal integer or a hex value starting with #
+    """
+    str_values = csv_str.split(",", 2)
+    values = []
+    for s in str_values:
+        if s[0] == '#':
+            values.append(int(s[1:], 16))
+        else:
+            values.append(int(s))
+    return Colour(*values)
+    
+def from_str (s):
+    """ Attempts to parse a string into a Colour object. """
+    try: 
+        return from_csv(s)
+    except Exception: 
+        pass
+        
+    try: 
+        return from_hex(s)
+    except Exception: 
+        pass
+
+    try:
+        return from_name(s)
+    except Exception: 
+        pass
+
+    raise ColourFormatError("'%s' is not a recognized colour string"%s)
+
+class ColourFormatError (Exception): pass
+       
+#originaly _TCODColour
+class Colour (object):
+    """ Wrapper over a LibTCOD Color object
+    """
+    def __init__(self, r, g, b, struct=None):
+        """ r, g, b are the RGB values of the colour between 0 and 255. If struct is provided, these are ignored.
+            struct is the LibTCOD Color struct to be used for this colour.
+        """
+        self._intern = struct or dlib.Color(r,g,b)
+    
+    def hex_str (self):
+        """ Returns the hex-string representation of this colour. """
+        return "#%02X%02X%02X"%(self._intern[0],self._intern[1],self._intern[2])
+        
+    def get_struct (self):
+        """ Returns the internal LibTCOD implementation of this colour. """
+        return self._intern
+        
+    def __eq__ (self, other):
+        return self._intern == other._intern
+
+    def __add__ (self, other):
+        return Colour(*(self._intern + other._intern))
+    
+    def __sub__ (self, other):
+        return Colour(*(self._intern - other._intern))
+    
+    def __mul__ (self, other):
+        if isinstance(other, self.__class__):
+            return Colour(*(self._intern * other._intern))
+        return Colour(*[ int(other*comp) for comp in self._intern ])
+    
+    def __rmul__ (self, other):
+        return self * other
+        
+    def __iter__(self):
+        """ Produces an iterator over the components of this colour. """
+        return iter(self._intern)
+    
+    def __repr__(self):
+        return "%s%s"%(self.__class__.__name__, tuple(self._intern))
+    
+#Not used
+class _RGBColour (object):
+    """ Simple data structure for an RGB colour.
+    """
+    def __init__(self, r, g, b):
+        """ r, g, b are the RGB values of the colour between 0 and 255.
+            To copy a Colour object, simply use Colour(*other_colour)
+        """
+        if r < 0 or r > 255: raise ValueError("r value is out of range: %d"%r)
+        if g < 0 or g > 255: raise ValueError("g value is out of range: %d"%g)
+        if b < 0 or b > 255: raise ValueError("b value is out of range: %d"%b)
+        
+        self.r, self.g, self.b = r, g, b
+    
+    def hex_str (self):
+        """ Returns the hex-string representation of this colour. """
+        return "#%02X%02X%02X"%(self.r, self.g, self.b)
+        
+    def __eq__ (self, other):
+        return self.r == other.r and self.g == other.g and self.b == other.b
+    
+    def __iter__(self):
+        """ Produces an iterator over the components of this colour. """
+        return iter((self.r, self.g, self.b))
+    
+    def __repr__(self):
+        return "%s(%d,%d,%d)"%(self.__class__.__name__, self.r, self.g, self.b)
+
+class TextColourParser (object):
+    """ 
+    """
+    pass
+    
+## Initialization
+colour_names = {}       #A dictionary that will contain the default colours
+#Colour = _TCODColour    #define the default Colour implementation
+        
+#######################################################################
+## Default Colours
+#######################################################################
+
 # grey levels
-black=Color(0,0,0)
-darkest_grey=Color(31,31,31)
-darker_grey=Color(63,63,63)
-dark_grey=Color(95,95,95)
-grey=Color(127,127,127)
-light_grey=Color(159,159,159)
-lighter_grey=Color(191,191,191)
-lightest_grey=Color(223,223,223)
-darkest_gray=Color(31,31,31)
-darker_gray=Color(63,63,63)
-dark_gray=Color(95,95,95)
-gray=Color(127,127,127)
-light_gray=Color(159,159,159)
-lighter_gray=Color(191,191,191)
-lightest_gray=Color(223,223,223)
-white=Color(255,255,255)
+
+black=Colour(0,0,0)
+darkest_grey=Colour(31,31,31)
+darker_grey=Colour(63,63,63)
+dark_grey=Colour(95,95,95)
+grey=Colour(127,127,127)
+light_grey=Colour(159,159,159)
+lighter_grey=Colour(191,191,191)
+lightest_grey=Colour(223,223,223)
+darkest_gray=Colour(31,31,31)
+darker_gray=Colour(63,63,63)
+dark_gray=Colour(95,95,95)
+gray=Colour(127,127,127)
+light_gray=Colour(159,159,159)
+lighter_gray=Colour(191,191,191)
+lightest_gray=Colour(223,223,223)
+white=Colour(255,255,255)
 
 # sepia
-darkest_sepia=Color(31,24,15)
-darker_sepia=Color(63,50,31)
-dark_sepia=Color(94,75,47)
-sepia=Color(127,101,63)
-light_sepia=Color(158,134,100)
-lighter_sepia=Color(191,171,143)
-lightest_sepia=Color(222,211,195)
+darkest_sepia=Colour(31,24,15)
+darker_sepia=Colour(63,50,31)
+dark_sepia=Colour(94,75,47)
+sepia=Colour(127,101,63)
+light_sepia=Colour(158,134,100)
+lighter_sepia=Colour(191,171,143)
+lightest_sepia=Colour(222,211,195)
 
-#standard colors
-red=Color(255,0,0)
-flame=Color(255,63,0)
-orange=Color(255,127,0)
-amber=Color(255,191,0)
-yellow=Color(255,255,0)
-lime=Color(191,255,0)
-chartreuse=Color(127,255,0)
-green=Color(0,255,0)
-sea=Color(0,255,127)
-turquoise=Color(0,255,191)
-cyan=Color(0,255,255)
-sky=Color(0,191,255)
-azure=Color(0,127,255)
-blue=Color(0,0,255)
-han=Color(63,0,255)
-violet=Color(127,0,255)
-purple=Color(191,0,255)
-fuchsia=Color(255,0,255)
-magenta=Color(255,0,191)
-pink=Color(255,0,127)
-crimson=Color(255,0,63)
+#standard Colours
+red=Colour(255,0,0)
+flame=Colour(255,63,0)
+orange=Colour(255,127,0)
+amber=Colour(255,191,0)
+yellow=Colour(255,255,0)
+lime=Colour(191,255,0)
+chartreuse=Colour(127,255,0)
+green=Colour(0,255,0)
+sea=Colour(0,255,127)
+turquoise=Colour(0,255,191)
+cyan=Colour(0,255,255)
+sky=Colour(0,191,255)
+azure=Colour(0,127,255)
+blue=Colour(0,0,255)
+han=Colour(63,0,255)
+violet=Colour(127,0,255)
+purple=Colour(191,0,255)
+fuchsia=Colour(255,0,255)
+magenta=Colour(255,0,191)
+pink=Colour(255,0,127)
+crimson=Colour(255,0,63)
 
-# dark colors
-dark_red=Color(191,0,0)
-dark_flame=Color(191,47,0)
-dark_orange=Color(191,95,0)
-dark_amber=Color(191,143,0)
-dark_yellow=Color(191,191,0)
-dark_lime=Color(143,191,0)
-dark_chartreuse=Color(95,191,0)
-dark_green=Color(0,191,0)
-dark_sea=Color(0,191,95)
-dark_turquoise=Color(0,191,143)
-dark_cyan=Color(0,191,191)
-dark_sky=Color(0,143,191)
-dark_azure=Color(0,95,191)
-dark_blue=Color(0,0,191)
-dark_han=Color(47,0,191)
-dark_violet=Color(95,0,191)
-dark_purple=Color(143,0,191)
-dark_fuchsia=Color(191,0,191)
-dark_magenta=Color(191,0,143)
-dark_pink=Color(191,0,95)
-dark_crimson=Color(191,0,47)
+# dark Colours
+dark_red=Colour(191,0,0)
+dark_flame=Colour(191,47,0)
+dark_orange=Colour(191,95,0)
+dark_amber=Colour(191,143,0)
+dark_yellow=Colour(191,191,0)
+dark_lime=Colour(143,191,0)
+dark_chartreuse=Colour(95,191,0)
+dark_green=Colour(0,191,0)
+dark_sea=Colour(0,191,95)
+dark_turquoise=Colour(0,191,143)
+dark_cyan=Colour(0,191,191)
+dark_sky=Colour(0,143,191)
+dark_azure=Colour(0,95,191)
+dark_blue=Colour(0,0,191)
+dark_han=Colour(47,0,191)
+dark_violet=Colour(95,0,191)
+dark_purple=Colour(143,0,191)
+dark_fuchsia=Colour(191,0,191)
+dark_magenta=Colour(191,0,143)
+dark_pink=Colour(191,0,95)
+dark_crimson=Colour(191,0,47)
 
-# darker colors
-darker_red=Color(127,0,0)
-darker_flame=Color(127,31,0)
-darker_orange=Color(127,63,0)
-darker_amber=Color(127,95,0)
-darker_yellow=Color(127,127,0)
-darker_lime=Color(95,127,0)
-darker_chartreuse=Color(63,127,0)
-darker_green=Color(0,127,0)
-darker_sea=Color(0,127,63)
-darker_turquoise=Color(0,127,95)
-darker_cyan=Color(0,127,127)
-darker_sky=Color(0,95,127)
-darker_azure=Color(0,63,127)
-darker_blue=Color(0,0,127)
-darker_han=Color(31,0,127)
-darker_violet=Color(63,0,127)
-darker_purple=Color(95,0,127)
-darker_fuchsia=Color(127,0,127)
-darker_magenta=Color(127,0,95)
-darker_pink=Color(127,0,63)
-darker_crimson=Color(127,0,31)
+# darker Colours
+darker_red=Colour(127,0,0)
+darker_flame=Colour(127,31,0)
+darker_orange=Colour(127,63,0)
+darker_amber=Colour(127,95,0)
+darker_yellow=Colour(127,127,0)
+darker_lime=Colour(95,127,0)
+darker_chartreuse=Colour(63,127,0)
+darker_green=Colour(0,127,0)
+darker_sea=Colour(0,127,63)
+darker_turquoise=Colour(0,127,95)
+darker_cyan=Colour(0,127,127)
+darker_sky=Colour(0,95,127)
+darker_azure=Colour(0,63,127)
+darker_blue=Colour(0,0,127)
+darker_han=Colour(31,0,127)
+darker_violet=Colour(63,0,127)
+darker_purple=Colour(95,0,127)
+darker_fuchsia=Colour(127,0,127)
+darker_magenta=Colour(127,0,95)
+darker_pink=Colour(127,0,63)
+darker_crimson=Colour(127,0,31)
 
-# darkest colors
-darkest_red=Color(63,0,0)
-darkest_flame=Color(63,15,0)
-darkest_orange=Color(63,31,0)
-darkest_amber=Color(63,47,0)
-darkest_yellow=Color(63,63,0)
-darkest_lime=Color(47,63,0)
-darkest_chartreuse=Color(31,63,0)
-darkest_green=Color(0,63,0)
-darkest_sea=Color(0,63,31)
-darkest_turquoise=Color(0,63,47)
-darkest_cyan=Color(0,63,63)
-darkest_sky=Color(0,47,63)
-darkest_azure=Color(0,31,63)
-darkest_blue=Color(0,0,63)
-darkest_han=Color(15,0,63)
-darkest_violet=Color(31,0,63)
-darkest_purple=Color(47,0,63)
-darkest_fuchsia=Color(63,0,63)
-darkest_magenta=Color(63,0,47)
-darkest_pink=Color(63,0,31)
-darkest_crimson=Color(63,0,15)
+# darkest Colours
+darkest_red=Colour(63,0,0)
+darkest_flame=Colour(63,15,0)
+darkest_orange=Colour(63,31,0)
+darkest_amber=Colour(63,47,0)
+darkest_yellow=Colour(63,63,0)
+darkest_lime=Colour(47,63,0)
+darkest_chartreuse=Colour(31,63,0)
+darkest_green=Colour(0,63,0)
+darkest_sea=Colour(0,63,31)
+darkest_turquoise=Colour(0,63,47)
+darkest_cyan=Colour(0,63,63)
+darkest_sky=Colour(0,47,63)
+darkest_azure=Colour(0,31,63)
+darkest_blue=Colour(0,0,63)
+darkest_han=Colour(15,0,63)
+darkest_violet=Colour(31,0,63)
+darkest_purple=Colour(47,0,63)
+darkest_fuchsia=Colour(63,0,63)
+darkest_magenta=Colour(63,0,47)
+darkest_pink=Colour(63,0,31)
+darkest_crimson=Colour(63,0,15)
 
-# light colors
-light_red=Color(255,114,114)
-light_flame=Color(255,149,114)
-light_orange=Color(255,184,114)
-light_amber=Color(255,219,114)
-light_yellow=Color(255,255,114)
-light_lime=Color(219,255,114)
-light_chartreuse=Color(184,255,114)
-light_green=Color(114,255,114)
-light_sea=Color(114,255,184)
-light_turquoise=Color(114,255,219)
-light_cyan=Color(114,255,255)
-light_sky=Color(114,219,255)
-light_azure=Color(114,184,255)
-light_blue=Color(114,114,255)
-light_han=Color(149,114,255)
-light_violet=Color(184,114,255)
-light_purple=Color(219,114,255)
-light_fuchsia=Color(255,114,255)
-light_magenta=Color(255,114,219)
-light_pink=Color(255,114,184)
-light_crimson=Color(255,114,149)
+# light Colours
+light_red=Colour(255,114,114)
+light_flame=Colour(255,149,114)
+light_orange=Colour(255,184,114)
+light_amber=Colour(255,219,114)
+light_yellow=Colour(255,255,114)
+light_lime=Colour(219,255,114)
+light_chartreuse=Colour(184,255,114)
+light_green=Colour(114,255,114)
+light_sea=Colour(114,255,184)
+light_turquoise=Colour(114,255,219)
+light_cyan=Colour(114,255,255)
+light_sky=Colour(114,219,255)
+light_azure=Colour(114,184,255)
+light_blue=Colour(114,114,255)
+light_han=Colour(149,114,255)
+light_violet=Colour(184,114,255)
+light_purple=Colour(219,114,255)
+light_fuchsia=Colour(255,114,255)
+light_magenta=Colour(255,114,219)
+light_pink=Colour(255,114,184)
+light_crimson=Colour(255,114,149)
 
-#lighter colors
-lighter_red=Color(255,165,165)
-lighter_flame=Color(255,188,165)
-lighter_orange=Color(255,210,165)
-lighter_amber=Color(255,232,165)
-lighter_yellow=Color(255,255,165)
-lighter_lime=Color(232,255,165)
-lighter_chartreuse=Color(210,255,165)
-lighter_green=Color(165,255,165)
-lighter_sea=Color(165,255,210)
-lighter_turquoise=Color(165,255,232)
-lighter_cyan=Color(165,255,255)
-lighter_sky=Color(165,232,255)
-lighter_azure=Color(165,210,255)
-lighter_blue=Color(165,165,255)
-lighter_han=Color(188,165,255)
-lighter_violet=Color(210,165,255)
-lighter_purple=Color(232,165,255)
-lighter_fuchsia=Color(255,165,255)
-lighter_magenta=Color(255,165,232)
-lighter_pink=Color(255,165,210)
-lighter_crimson=Color(255,165,188)
+#lighter Colours
+lighter_red=Colour(255,165,165)
+lighter_flame=Colour(255,188,165)
+lighter_orange=Colour(255,210,165)
+lighter_amber=Colour(255,232,165)
+lighter_yellow=Colour(255,255,165)
+lighter_lime=Colour(232,255,165)
+lighter_chartreuse=Colour(210,255,165)
+lighter_green=Colour(165,255,165)
+lighter_sea=Colour(165,255,210)
+lighter_turquoise=Colour(165,255,232)
+lighter_cyan=Colour(165,255,255)
+lighter_sky=Colour(165,232,255)
+lighter_azure=Colour(165,210,255)
+lighter_blue=Colour(165,165,255)
+lighter_han=Colour(188,165,255)
+lighter_violet=Colour(210,165,255)
+lighter_purple=Colour(232,165,255)
+lighter_fuchsia=Colour(255,165,255)
+lighter_magenta=Colour(255,165,232)
+lighter_pink=Colour(255,165,210)
+lighter_crimson=Colour(255,165,188)
 
-# lightest colors
-lightest_red=Color(255,191,191)
-lightest_flame=Color(255,207,191)
-lightest_orange=Color(255,223,191)
-lightest_amber=Color(255,239,191)
-lightest_yellow=Color(255,255,191)
-lightest_lime=Color(239,255,191)
-lightest_chartreuse=Color(223,255,191)
-lightest_green=Color(191,255,191)
-lightest_sea=Color(191,255,223)
-lightest_turquoise=Color(191,255,239)
-lightest_cyan=Color(191,255,255)
-lightest_sky=Color(191,239,255)
-lightest_azure=Color(191,223,255)
-lightest_blue=Color(191,191,255)
-lightest_han=Color(207,191,255)
-lightest_violet=Color(223,191,255)
-lightest_purple=Color(239,191,255)
-lightest_fuchsia=Color(255,191,255)
-lightest_magenta=Color(255,191,239)
-lightest_pink=Color(255,191,223)
-lightest_crimson=Color(255,191,207)
+# lightest Colours
+lightest_red=Colour(255,191,191)
+lightest_flame=Colour(255,207,191)
+lightest_orange=Colour(255,223,191)
+lightest_amber=Colour(255,239,191)
+lightest_yellow=Colour(255,255,191)
+lightest_lime=Colour(239,255,191)
+lightest_chartreuse=Colour(223,255,191)
+lightest_green=Colour(191,255,191)
+lightest_sea=Colour(191,255,223)
+lightest_turquoise=Colour(191,255,239)
+lightest_cyan=Colour(191,255,255)
+lightest_sky=Colour(191,239,255)
+lightest_azure=Colour(191,223,255)
+lightest_blue=Colour(191,191,255)
+lightest_han=Colour(207,191,255)
+lightest_violet=Colour(223,191,255)
+lightest_purple=Colour(239,191,255)
+lightest_fuchsia=Colour(255,191,255)
+lightest_magenta=Colour(255,191,239)
+lightest_pink=Colour(255,191,223)
+lightest_crimson=Colour(255,191,207)
 
-# desaturated colors
-desaturated_red=Color(127,63,63)
-desaturated_flame=Color(127,79,63)
-desaturated_orange=Color(127,95,63)
-desaturated_amber=Color(127,111,63)
-desaturated_yellow=Color(127,127,63)
-desaturated_lime=Color(111,127,63)
-desaturated_chartreuse=Color(95,127,63)
-desaturated_green=Color(63,127,63)
-desaturated_sea=Color(63,127,95)
-desaturated_turquoise=Color(63,127,111)
-desaturated_cyan=Color(63,127,127)
-desaturated_sky=Color(63,111,127)
-desaturated_azure=Color(63,95,127)
-desaturated_blue=Color(63,63,127)
-desaturated_han=Color(79,63,127)
-desaturated_violet=Color(95,63,127)
-desaturated_purple=Color(111,63,127)
-desaturated_fuchsia=Color(127,63,127)
-desaturated_magenta=Color(127,63,111)
-desaturated_pink=Color(127,63,95)
-desaturated_crimson=Color(127,63,79)
+# desaturated Colours
+desaturated_red=Colour(127,63,63)
+desaturated_flame=Colour(127,79,63)
+desaturated_orange=Colour(127,95,63)
+desaturated_amber=Colour(127,111,63)
+desaturated_yellow=Colour(127,127,63)
+desaturated_lime=Colour(111,127,63)
+desaturated_chartreuse=Colour(95,127,63)
+desaturated_green=Colour(63,127,63)
+desaturated_sea=Colour(63,127,95)
+desaturated_turquoise=Colour(63,127,111)
+desaturated_cyan=Colour(63,127,127)
+desaturated_sky=Colour(63,111,127)
+desaturated_azure=Colour(63,95,127)
+desaturated_blue=Colour(63,63,127)
+desaturated_han=Colour(79,63,127)
+desaturated_violet=Colour(95,63,127)
+desaturated_purple=Colour(111,63,127)
+desaturated_fuchsia=Colour(127,63,127)
+desaturated_magenta=Colour(127,63,111)
+desaturated_pink=Colour(127,63,95)
+desaturated_crimson=Colour(127,63,79)
 
 # metallic
-brass=Color(191,151,96)
-copper=Color(197,136,124)
-gold=Color(229,191,0)
-silver=Color(203,203,203)
+brass=Colour(191,151,96)
+copper=Colour(197,136,124)
+gold=Colour(229,191,0)
+silver=Colour(203,203,203)
 
 # miscellaneous
-celadon=Color(172,255,175)
-peach=Color(255,159,127)
+celadon=Colour(172,255,175)
+peach=Colour(255,159,127)
 
+#build a dictionary of the colours contained in this module
+_global_dict = dict(globals())
+for name, val in _global_dict.iteritems():
+    if isinstance(val, Colour):
+        colour_names[name] = val

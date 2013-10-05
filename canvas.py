@@ -1,6 +1,8 @@
 import libtcodpy as dlib
 from misc import Rectangle
+from colour import Colour
 
+#TODO - wrap LibTCOD background effect flags
 
 ## todo: key colour
 class Canvas (object):
@@ -42,7 +44,7 @@ class Canvas (object):
     ## style properties
     @property
     def bg_colour(self):
-        return dlib.console_get_default_background(self._intern)
+        return Colour(0,0,0,struct=dlib.console_get_default_background(self._intern))
     
     @bg_colour.setter
     def bg_colour(self, bg):
@@ -51,22 +53,28 @@ class Canvas (object):
         else:
             if self.bg_effect == dlib.BKGND_NONE:
                 self.bg_effect = dlib.BKGND_SET
-            dlib.console_set_default_background(self._intern, bg)
+            dlib.console_set_default_background(self._intern, bg.get_struct())
         
     @property
     def fg_colour(self):
-        return dlib.console_get_default_foreground(self._intern)
+        """ The default foreground colour which is used for functions that do not explicitly ask for one.
+        """
+        return Colour(0,0,0,struct=dlib.console_get_default_foreground(self._intern))
     
     @fg_colour.setter
     def fg_colour(self, fg):
-        dlib.console_set_default_foreground(self._intern, fg)
+        dlib.console_set_default_foreground(self._intern, fg.get_struct())
        
     @property
     def bg_effect(self):
+        """ The default background colour which is used for functions that do not explicitly ask for one.
+        """
         return dlib.console_get_background_flag(self._intern)
        
     @bg_effect.setter
     def bg_effect(self, effect):
+        """ The default background effect which is used for functions that do not explicitly ask for one.
+        """
         return dlib.console_set_background_flag(self._intern, effect)
         
     ## drawing functions
@@ -87,6 +95,9 @@ class Canvas (object):
                           rect.width, rect.height, opaque, effect)
     
     def put_char(self, x, y, ch):
+        """ Puts the specified character or tile at the x, y coordinate, offset by this Canvas' offset values.
+            ch can be either a string or integral type.
+        """
         x += self.x_offset
         y += self.y_offset
         dlib.console_put_char(self._intern, x, y, ch)
@@ -102,9 +113,9 @@ class Canvas (object):
     def set_cell(self, x, y, ch=None, bg=None, fg=None, bg_effect=dlib.BKGND_DEFAULT):
         x += self.x_offset
         y += self.y_offset
-        if bg: dlib.console_set_char_background(self._intern, x, y, bg, bg_effect)
-        if fg: dlib.console_set_char_background(self._intern, x, y, fg)
-        if ch: dlib.console_put_char(self._intern, x, y, ch)       
+        if bg: dlib.console_set_char_background(self._intern, x, y, bg.get_struct(), bg_effect)
+        if fg: dlib.console_set_char_background(self._intern, x, y, fg.get_struct())
+        if ch: dlib.console_put_char(self._intern, x, y, ch)
                    
     ## text functions
     def printstr(self, x, y, s):
@@ -116,9 +127,9 @@ class Canvas (object):
     def get_char(self, x, y):
         x += self.x_offset
         y += self.y_offset
-        return chr(dlib.console_get_char(self._intern,x,y))
+        return chr(dlib.console_get_char(self._intern,x,y)) #TODO return a Tile object instead
 
-                   
+
 class CanvasState (object):
     """ Allows you to use the Canvas's properties such as bg_colour, fg_colour, text_align, 
         and automatically restores them once you are done.

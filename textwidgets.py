@@ -104,14 +104,14 @@ class Text (object):
                 
 ## Test Code
 if __name__ == "__main__":
-    import libtcodpy as dlib
+    import colour
     import console
     from decorators import Border
     from lines import double_line
     
     console.init(30,30,"Text Test")
     
-    text = Text('The standard chunk of \n   LoremIpsumusedsincethe1500sisreproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also repr\noduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.', 15, bg_colour=dlib.darker_red)   #, nbsp=' ')
+    text = Text('The standard chunk of \n   Lorem_Ipsum_used_since_the_1500s_is_reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also repr\noduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.', 15, bg_colour=colour.darker_red)   #, nbsp=' ')
     
     (text >> Border(double_line)).render(console.canvas(), 2, 2)
     console.flush()
