@@ -40,7 +40,10 @@ class Text (object):
     @text.setter
     def text (self, value):
         self._text = value
-        self._lines = [Label(text) for text in self._get_line_text()] #generate lines from text flow
+        if self.nbsp: 
+            self._lines = [Label(text.replace(self.nbsp, " ")) for text in self._get_line_text()] #make sure to replace nbsp characters with spaces
+        else:
+            self._lines = [Label(text) for text in self._get_line_text()] #generate lines from text flow
     
     def _is_space(self, c):
         """ Returns True if c should be considered whitespace. """
@@ -111,7 +114,7 @@ if __name__ == "__main__":
     
     console.init(30,30,"Text Test")
     
-    text = Text('The standard chunk of \n   Lorem_Ipsum_used_since_the_1500s_is_reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also repr\noduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.', 15, bg_colour=colour.darker_red)   #, nbsp=' ')
+    text = Text('The standard chunk of \n   Lorem_Ipsum_used_since_the_1500s_is_reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also repr\noduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.', 15, bg_colour=colour.darker_red, nbsp='_')
     
     (text >> Border(double_line)).render(console.canvas(), 2, 2)
     console.flush()
