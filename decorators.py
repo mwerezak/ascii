@@ -43,7 +43,7 @@ class Decorator(object):
 class Fill(Decorator):
     def __init__(self, **style):
         Decorator.__init__(self)
-        self.style = CanvasStyle(style)
+        self.style = CanvasStyle(**style)
         self.target = None
        
     def width (self): return self.target.width()
@@ -118,7 +118,7 @@ class Anchor(Decorator):
 class Border(Decorator):
     def __init__(self, linestyle, left=True, right=True, top=True, bottom=True, **style):
         Decorator.__init__(self)
-        self.style = CanvasStyle(style)
+        self.style = CanvasStyle(**style)
         self.linestyle = linestyle
         self.left = left
         self.right = right

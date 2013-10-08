@@ -6,7 +6,7 @@ class Label(object):
     """A widget that displays a single line of text."""
 
     def __init__ (self,text, **style):       
-        self.style = CanvasStyle(style)
+        self.style = CanvasStyle(**style)
         self.text = text
        
     def width (self): return len(self.text)
@@ -23,7 +23,7 @@ class Text (object):
         If nbsp is a character, then that character will be used as non-breaking space.
     """
     def __init__(self, text, max_width, text_align="left", nbsp=None, **style):
-        self.style = CanvasStyle(style)
+        self.style = CanvasStyle(**style)
         if max_width <= 0: raise ValueError("max_width must be greater than 0")
         
         self.max_width = max_width

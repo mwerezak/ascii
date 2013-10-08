@@ -172,7 +172,7 @@ class CanvasState (object):
 class CanvasStyle (dict):
     """ A container used to hold style properties of a ui object, such as a widget.
     """
-    def __init__(self, style_mapping):
+    def __init__(self, **style_mapping):
         for prop, val in style_mapping.iteritems():
             self[prop] = val
     

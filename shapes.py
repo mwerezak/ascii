@@ -3,7 +3,7 @@ import libtcodpy as dlib
 
 class RectangleShape(object):
     def __init__(self, width, height, char=None, **style):
-        self.style = CanvasStyle(style)
+        self.style = CanvasStyle(**style)
         self._w = width
         self._h = height
         self.char = char
@@ -25,7 +25,7 @@ class RectangleShape(object):
 
 class Cell(object):
     def __init__(self, char, **style):
-        self.style = CanvasStyle(style)
+        self.style = CanvasStyle(**style)
         self.char = char
         
     def width (self): return 1
@@ -43,7 +43,7 @@ class CellArray(object):
             For each item that is None the corresponding cell will not be rendered.
             bg_char specifies the characters that will be ignored. This parameter may be None
         """
-        self.style = CanvasStyle(style)
+        self.style = CanvasStyle(**style)
         self._w = width
         self._h = height
         self.bg_char = bg_char
