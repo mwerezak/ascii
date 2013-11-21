@@ -176,6 +176,9 @@ class CanvasStyle (dict):
         for prop, val in style_mapping.iteritems():
             self[prop] = val
     
+    def __getattr__(self, name):
+        return self.get(name, None)
+    
     def apply(self, canvas):
         """Applies this Widget's style properties to a canvas."""
         for prop, val in self.iteritems():

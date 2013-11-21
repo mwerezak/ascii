@@ -39,10 +39,10 @@ class ControlBase (object):
 
 
 def ControlLoop (object):
-    def __init__ (self, root_control, background, foreground):
+    def __init__ (self, root_control, background, foreground=None):
         self.root_control = root_control
         self.background = background
-        self.foreground = foreground
+        self.foreground = foreground or console.canvas()
     
         
     

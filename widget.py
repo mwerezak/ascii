@@ -4,10 +4,14 @@ from misc import Rectangle
 
 class Widget (object):
     """ A Widget is an object that handles drawing and appearance of UI Controls.
+        The minimum requirement for a widget are width() and height() methods that
+        return the size of the bounding rectangle that contains the area in which
+        the widget will be drawn, and a render(canvas, x, y) method that draws
+        the widget onto a canvas with the upper left corner at x,y.
+        
+        This optional widget superclass provides _pre_render and _post_render methods
+        that may be helpful for customising widget behaviour.
     """
-    def __init__(self, **style):
-        self.style = CanvasStyle(style)
-    
     def width (self):
         """ Override in a subclass."""
         return 0
@@ -15,11 +19,22 @@ class Widget (object):
     def height (self): 
         """ Override in a subclass."""
         return 0
-       
-    def render(self, canvas, x, y):
+        
+    def _render(self, canvas, x, y):
         """ Override in a subclass. The widget must draw itself with it's upper left corner at x,y. """
-        with CanvasState(canvas, x, y):
-            self.style.apply(canvas)
+        pass
+        
+    def _pre_render(self, canvas, x, y):
+        pass
+    
+    def _post_render(self, canvas, x, y):
+        pass
+        
+    def render(self, canvas, x, y):
+        self._pre_render(canvas, x, y)
+        self._render(canvas, x, y)
+        self._post_render(canvas, x, y)
+
         
     
 class Align(object):
