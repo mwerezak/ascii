@@ -1,16 +1,12 @@
 
-from blist import sorteddict
-import libtcodpy as dlib
-
-
 class Animation (object):
     """ An animation consists of a sequence of frames, each with a duration in ticks.
         Each frame is a widget, and the Animation object is itself a widget that simply
         renders as whatever the current frame is.
-        The meaning of a tick is determined by the clock implementation used.
+        The meaning of a tick is determined by whoever calls the update() method on the animation.
     """
     
-    def __init__ (self, frames, clock, loop=True):
+    def __init__ (self, frames, loop=True):
         """ frames should be a sequence of (widget, duration).
             clock should be an object that has a get_tick() method.
             If loop is True, then the Animation will reset once the last frame's duration passes.
@@ -18,64 +14,43 @@ class Animation (object):
         if len(frames) == 0:
             raise ValueError ("at least one frame must be supplied")
         
-        self.frames = list(frames)
-        self.clock = clock
         self.loop = loop
         
-        self.reset()
+        self._cur_frame_idx = 0
+        self._frames = [] #stores tuples of (start_tick, end_tick, frame). start_tick and end_tick form a half-open interval
+        self.extend(frames)
         
     def reset (self): 
-        self._cur_idx = 0
-        self._cur_frame, self._next_frame_tick = self.frames[0]
-        self._start_tick = self.clock.get_tick()
+        self.update(0)
     
-    def update (self):
-        cur_tick = self.clock.get_tick() - self._start_tick
+    def update (self, cur_tick):
+        if self.loop:
+            cur_tick %= self.total_length()
         
-        while cur_tick >= self._next_frame_tick:
-            
-            #check if we are at the last frame
-            if self._cur_idx >= len(self.frames) - 1:
-                if self.loop: self.reset()
+        for idx, (start, end, frame) in enumerate(self._frames):
+            if start <= cur_tick and cur_tick < end:
+                self._cur_frame_idx = idx
                 return
-            
-            self._cur_idx += 1
-            self._cur_frame, next_frame_duration = self.frames[self._cur_idx]
-            self._next_frame_tick += next_frame_duration           
+        
+        #if we got here then we've run past the end of the animation
+        self._cur_frame_idx = len(self._frames) - 1
         
     def current_frame (self):
-        return self._cur_frame
+        return self._frames[self._cur_frame_idx][2]
     
-    def set_current_frame (self, idx):
-        if idx == 0:
-            self.reset()
-            return
-        
-        if idx < 0:
-            idx = len(self.frames) - idx
-        if idx >= len(self.frames):
-            raise IndexError ("index out of range")
-        
-        self._cur_idx = idx
-        self._cur_frame = self.frames[idx]
-        
-        durations = zip(*self.frames)[1]
-        self._next_frame_tick = sum(durations[:idx])
-        self._start_tick = self.clock.get_tick() - sum(durations[:idx - 1])
-    
-    def seek (self, ticks):
-        """ Similar to set_current_frame(), but sets the Animation as if the specified 
-            number of ticks has elapsed since start.
+    def total_length (self):
+        """ Returns the total duration of the animation in ticks.
         """
-        elapsed_duration = 0
-        for i, (frame, duration) in enumerate(self.frame):
-            if ticks < elapsed_duration + duration: break
+        if len(self._frames) == 0:
+            return 0
+        return self._frames[-1][1]
         
-        self.set_current_frame(i)
-        self._start_tick = self.clock.get_tick() - ticks
-    
     def extend (self, other):
-        self.frames.extend(other)
+        start_tick = self.total_length()
+        for frame, duration in frames:
+            frame_info = (start_tick, start_tick + duration, frame)
+            self._frames.append(frame_info)
+            start_tick += duration
         
     def __iter__ (self):
         return iter(self.frames)
