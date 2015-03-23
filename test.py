@@ -1,139 +1,54 @@
-
-import time
-import console
-import keyboard
-from layouts import VerticalFlow
-from decorators import Anchor
-from textwidgets import Label
-
-
-class Menu (object):
-    def __init__ (self):
-        self._items = []
-        self._idx = None
-        self._layout = VerticalFlow()
-    
-    def _update_layout (self):
-        self._layout.items = [item.get_widget(i == self._idx) for i, item in enumerate(self._items)]
-    
-    @property
-    def selected_item (self):
-        if self._idx is None:
-            return None
-        return self._items[self._idx]
-    
-    @selected_item.setter
-    def selected_item (self, value):
-        self._idx = self._items.index(value)
-        self._update_layout()
-        
-    def add_item (self, item):
-        self._items.append(item)
-        self._update_layout()
-        
-    def select_next (self):
-        if self._idx is None:
-            self._idx = 0
-        else:
-            self._idx += 1
-        
-        if self._idx >= len(self._items):
-            self._idx = None
-        
-        self._update_layout()
-            
-    def select_prev (self):
-        if self._idx is None:
-            self._idx = len(self._items) - 1
-        else:
-            self._idx -= 1
-        
-        if self._idx < 0:
-            self._idx = None
-        
-        self._update_layout()
-        
-    def activate (self):
-        if self._idx is not None:
-            self._items[self._idx].activate()
-        
-    def width (self): return self._layout.width()
-    
-    def height (self): return self._layout.height()
-        
-    def render (self, canvas, x, y):
-        self._layout.render(canvas, x, y)
-    
-class MenuItem (object):
-    def __init__(self, text, default_style, selected_style, callback):
-        self.callback = callback
-        self._default_widget = Label(text, **default_style)
-        self._selected_widget = Label(text, **selected_style)
-    
-    def get_widget (self, selected):
-        if selected:
-            return self._selected_widget
-        else:
-            return self._default_widget
-    
-    def activate (self):
-        self.callback()
-
-class PaintPanel (object):
-    pass
-    
-class ControlLoop (object):
-    def __init__(self, foreground=None):
-        self.foreground = foreground or console.canvas()
-        self._stop = False
-        self.handle_input = lambda keyinput: None
-        self.render = lambda foreground:None
-    
-    def stop (self):
-        self._stop = True
-
-    def run (self, background):
-        while not self._stop and not console.closed():
-            self.handle_input(keyboard.get_input())
-            
-            background.blit_to(self.foreground, 0, 0)
-            self.render(self.foreground)
-            
-            console.flush()
-            time.sleep(0.015)
-
 if __name__ == "__main__":
-    from canvas import CanvasStyle, Canvas
+    import time
     import sys
-    import colour
+    import console
+    from widget import *
+    #from layouts import *
+    from textwidgets import *
+    from shapes import *
+    from decorators import *
+    from lines import *
+    #from controls import *
+    from events import *
+    #from keyinput import *
+    from colour import *
     
-    item_style = CanvasStyle(fg_colour=colour.white,bg_colour=colour.dark_red)
-    selected_style = CanvasStyle(fg_colour=colour.dark_red,bg_colour=colour.white)
+    #string = "".join([chr(c) for c in (CHAR_HLINE,CHAR_NE,CHAR_TEEE,CHAR_DVLINE,CHAR_ARROW_N,CHAR_CHECKBOX_SET)])
+    string = "a string"
     
-    file_menu = Menu()
-    file_menu.add_item( MenuItem("Foo", item_style, selected_style, lambda: console.set_title("Foo")) )
-    file_menu.add_item( MenuItem("Bar", item_style, selected_style, lambda: console.set_title("Bar")) )
-    file_menu.add_item( MenuItem("Quit", item_style, selected_style, lambda: sys.exit()) )
+    #console.init(200,120,"Root")
+    #console.init(80,48,"Root")
+    console.init(80,80,"Root")
+    #console.set_fullscreen(True)
+    root = console.canvas()
     
-    def handle_input (key):
-        if key.released:
-            if key == "up":
-                file_menu.select_prev()
-            elif key == "down":
-                file_menu.select_next()
-            elif key == "enter":
-                file_menu.activate()
-            elif key == "esc":
-                sys.exit()
+    #panel = AbsoluteLayout()
     
-    def render (canvas):
-        file_menu.render(canvas, 0, 0)
+    label1 = Label("Here is some text") >> Padding(top=5) >> Border(double_line, fg_colour=white) >> Fill(bg_colour=dark_blue)
+    label2 = Label("This is a really long string of text.") >> Padding(hpad=3, vpad=2) >> Border(double_line, fg_colour=yellow) >> Fill(bg_colour=dark_red)
+    label3 = Label("This text is right-aligned") >> Padding(hpad=8) >> Border(single_line, fg_colour=red) >> Fill(bg_colour=dark_amber)
+    label4 = Text('The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested.\n\nSections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.', 30, nbsp='s') >> Padding(hpad=2, vpad=1) >> Border(single_line, fg_colour=red) >> Fill(bg_colour=dark_amber)
     
-    console.init(40,20, "Menu Test")
+    #label4 = Label("This is a really long string of text.") >> Padding(hpad=3, vpad=2) >> Border(double_line, fg_colour=yellow) >> Fill(bg_colour=dark_red)
     
-    bg = Canvas(40,20)
+    label1.render(root, 30, 9)
+    label2.render(root, 40, 15)
+    label3.render(root, 30, 4)
+    label4.render(root, 10, 25)
+    #panel.add(label1, 30, 9, zlevel=2)
+    #panel.add(label2, 40, 15, halign="left", zlevel=3)
+    #panel.add(label3, 30, 4, zlevel=1, halign="right")
+    #panel.add(label4, 10, 25, halign="left", zlevel=4)
     
-    loop = ControlLoop()
-    loop.handle_input = handle_input
-    loop.render = render
-    loop.run(bg)
+    bg = RectangleShape(console.width(),console.height(), char="/", fg_colour=dark_grey, bg_colour=darkest_red)
+    #panel.add(bg, 0, 0, zlevel=-100)
+    
+    #bg.render(root,0,0)
+    #panel.render(root, 0,0)
+    
+    #key_input.check_for_input()
+    
+    console.flush()
+    #time.sleep(0.015)
+    
+    console.wait_for_user()
